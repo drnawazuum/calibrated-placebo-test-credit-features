@@ -1,45 +1,41 @@
-# A Calibrated Placebo Test for Time-Varying Features in Credit Risk Models
+# Replication package: A Calibrated Placebo Test for Time-Varying Features in Credit Risk Models
 
-Replication code for the working paper by **Muhammad Nawaz** (October 2026).
+Author: Muhammad Nawaz. Companion to SSRN 7622180 (https://ssrn.com/abstract=7622180).
 
-- Paper (SSRN): link to be added after posting
-- Companion paper: *Explainable Machine Learning for Basel and IFRS 9 Credit Risk: A Placebo-Controlled Test of Narrative Features*, https://ssrn.com/abstract=7622180
-- Companion code: https://github.com/drnawazuum/Placebo-test-narrative-features
-
-## What the paper is about
-Banks add time-varying inputs (macro indicators, text sentiment) to credit models. The usual check is whether the model's AUC improves. In simulation, a useless but slowly changing series passes this check far more often than the intended 5%, especially when the model has no period control. A placebo test that uses fake series with the same persistence as the real one keeps the false-pass rate at 2% to 5%, at a cost in power. Two public loan datasets (Lending Club and Bondora) illustrate the point.
-
-## Quick start
-Open `Paper_A_simulation.ipynb` in Jupyter and run the cells from top to bottom.
-
-- Default is a quick test (`REPS = 10`, a few minutes). Results are noisy.
-- Set `REPS = 300` to reproduce the paper (roughly 1.5 to 2 hours on 2 CPU cores).
-- Packages: `numpy scipy pandas matplotlib joblib` (`pip install numpy scipy pandas matplotlib joblib`).
-
-## Files
+## What each file does (plain language)
 | File | What it does |
 |---|---|
-| `Paper_A_simulation.ipynb` | All simulation code, tables and figures in one notebook |
-| `sim.py`, `sim2.py` | Simulation and the three tests (standard check, shuffled placebo, persistence-matched placebo) |
-| `run_sim.py`, `run_sim2.py` | Run the 14 settings of the paper |
-| `summarise.py` | Pass rates with 95% Wilson intervals (`sim_summary.csv`) |
-| `make_figures.py` | Figures 1 and 2 |
-| `real.py`, `real_results.csv` | Real-data runs (Table 3); need the data of the companion paper, set `PAPER1_DIR` |
-| `sim_results.csv`, `sim2_results.csv` | Raw results of the 300-repetition runs |
+| `sim.py` | Builds one simulated loan portfolio, runs the standard check and the two placebo tests (year effects included). |
+| `sim2.py` | Same, with options for the credit-cycle strength and for switching year effects off. |
+| `run_sim.py` | Runs the 9 main settings, 300 repetitions each -> `sim_results.csv`. |
+| `run_sim2.py` | Runs the 5 extra settings (no period control, drifting cycle) -> `sim2_results.csv`. |
+| `summarise.py` | Turns the raw results into pass rates with 95% Wilson intervals -> `sim_summary.csv`. |
+| `make_figures.py` | Draws Figure 1 and Figure 2 from `sim_summary.csv`. |
+| `real.py` | Real-data illustration (Lending Club with FOMC tone, Bondora with ECB tone). Needs the data and tone files of the companion paper; set `PAPER1_DIR` to that folder. Usage: `python3 real.py {lc|bondora} {none|year|quarter} 99 60000 out.csv` |
+| `real_results.csv` | The six real-data results used in Table 3. |
 
-## Data
-Lending Club and Bondora data are not redistributed here. See the companion repository for sources and terms of use.
+## Run order
+```
+pip install numpy scipy pandas scikit-learn joblib matplotlib
+python3 run_sim.py 300      # slow: several hours on 2 cores
+python3 run_sim2.py 300
+python3 summarise.py
+python3 make_figures.py
+```
+The raw result files from our run are included, so `summarise.py` and `make_figures.py` can be run at once.
 
 ## Notes
-- A placebo test passes when its p-value is below 0.05 (99 placebo series).
-- Seeds are fixed in the scripts.
-- The simulation is deliberately simple (logistic scorecard, random train-test split). See the limitations section of the paper.
+- Placebo test passes when the p-value is below 0.05, with 99 placebos.
+- The Lending Club and Bondora data are not redistributed here; see the companion paper's repository for sources and terms.
+- Seeds are fixed in the scripts, so results should reproduce.
+
+## Quick check (about 10 minutes)
+Copy this folder first, because the scripts overwrite the result files. Then:
+```
+python3 sim.py                # one simulated run; prints the three test results
+python3 run_sim.py 5          # 5 repetitions per setting instead of 300
+```
+Results from 5 repetitions are noisy; only the 300-repetition run reproduces the paper.
 
 ## Disclosure of AI use
-Claude (Anthropic), a generative AI assistant, was used for language correction, for searching relevant literature, and for drafting and correcting the Python code. The author ran and checked the code and the results and takes full responsibility for the content.
-
-## Citation
-Nawaz, M. (2026). A calibrated placebo test for time-varying features in credit risk models. Working paper.
-
-## Licence
-MIT (add a `LICENSE` file by choosing the MIT template when you create the repository).
+Claude (Anthropic), a generative AI assistant, was used for language correction, for searching relevant literature, and for drafting and correcting the Python code. The author ran and checked the code and the results and is responsible for the content.
